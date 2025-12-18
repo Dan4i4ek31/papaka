@@ -994,8 +994,9 @@ async function createMarketListing(listingData) {
       showToast('Публикация успешно создана!', 'success');
       return newListing;
     } else {
-      const error = await response.json();
-      throw new Error(error.detail || 'Ошибка создания публикации');
+      const errorText = await response.text();
+      console.error('Ошибка API маркетплейса:', errorText);
+      throw new Error('Ошибка создания публикации на маркетплейсе');
     }
   } catch (error) {
     console.error('Ошибка создания публикации:', error);
@@ -1012,6 +1013,8 @@ async function createAccountListing(listingData) {
       return null;
     }
     
+    console.log('Отправка авторского издания на сервер:', listingData);
+    
     const response = await fetch(`${API_BASE_URL}/author-listings/`, {
       method: 'POST',
       headers: {
@@ -1024,13 +1027,26 @@ async function createAccountListing(listingData) {
       })
     });
     
+    console.log('Ответ сервера:', response.status, response.statusText);
+    
     if (response.ok) {
       const newListing = await response.json();
+      console.log('Авторское издание успешно создано:', newListing);
       showToast('Авторское издание успешно создано!', 'success');
       return newListing;
     } else {
-      const error = await response.json();
-      throw new Error(error.detail || 'Ошибка создания издания');
+      // Пытаемся распарсить ошибку
+      let errorMessage = 'Ошибка создания издания';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorData.message || errorMessage;
+      } catch (parseError) {
+        // Если не можем распарсить JSON, используем текст ошибки
+        const errorText = await response.text();
+        console.error('Текст ошибки:', errorText);
+        errorMessage = `Ошибка сервера (${response.status}): ${errorText || response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error('Ошибка создания авторского издания:', error);
@@ -1212,8 +1228,8 @@ function renderProducts() {
     
     const popularityStars = product.popularity > 0 
       ? `<div style="display: flex; gap: 2px; margin: 4px 0; font-size: 12px; color: #ffc107;">
-          ${'★'.repeat(Math.min(Math.floor(product.popularity / 20), 5))}
-          ${'☆'.repeat(5 - Math.min(Math.floor(product.popularity / 20), 5))}
+          ${('★').repeat(Math.min(Math.floor(product.popularity / 20), 5))}
+          ${('☆').repeat(5 - Math.min(Math.floor(product.popularity / 20), 5))}
          </div>`
       : '';
     
@@ -1375,7 +1391,7 @@ function renderReviews() {
         <div>
           <strong style="font-size:14px;">${review.author}</strong>
           <div style="display:flex;gap:2px;margin-top:2px;">
-            ${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}
+            ${('★').repeat(review.rating)}${('☆').repeat(5-review.rating)}
           </div>
         </div>
       </div>
