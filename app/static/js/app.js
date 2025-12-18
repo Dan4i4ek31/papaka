@@ -642,6 +642,7 @@ async function checkAuthStatus() {
   const authArea = document.getElementById('authArea');
   const userProfile = document.getElementById('userProfile');
   const authButtons = document.getElementById('authButtons');
+  const cartBtn = document.getElementById('cartBtn');
   
   if (user && user.name && user.id) {
     AppState.user = user;
@@ -649,6 +650,7 @@ async function checkAuthStatus() {
     // Пользователь авторизован
     if (userProfile) userProfile.style.display = 'flex';
     if (authButtons) authButtons.style.display = 'none';
+    if (cartBtn) cartBtn.style.display = 'block'; // Показываем корзину
     
     // Обновляем аватар и имя
     updateUserProfileUI(user);
@@ -670,6 +672,7 @@ async function checkAuthStatus() {
     AppState.favorites = []; // Очищаем избранное при выходе
     if (userProfile) userProfile.style.display = 'none';
     if (authButtons) authButtons.style.display = 'flex';
+    if (cartBtn) cartBtn.style.display = 'none'; // СКРЫВАЕМ КОРЗИНУ
     
     // Обновляем кнопки избранного на странице
     updateFavoriteButtons();
@@ -2154,4 +2157,22 @@ function updateChatButton() {
       window.location.href = '/chat.html';
     });
   }
+}
+
+function getCategoryColor(category) {
+  const categoryLower = (category || '').toLowerCase();
+  const colors = {
+    'dota 2': '#2b5cff',
+    'dota2': '#2b5cff',
+    'fnaf': '#7b61ff',
+    'классика': '#28a745',
+    'стратегия': '#fd7e14',
+    'инди': '#e83e8c',
+    'анализ': '#17a2b8',
+    'гайды': '#6f42c1',
+    'лор': '#20c997',
+    'маркет': '#00b4d8',
+    'авторское': '#e83e8c'
+  };
+  return colors[categoryLower] || 'rgba(102, 126, 234, 0.8)';
 }
