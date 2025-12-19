@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ЦифраМаркет</title>
 
   <!-- Favicons -->
@@ -17,7 +17,6 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="/app/static/css/styles.css">
-  <link rel="stylesheet" href="/app/static/css/mobile-enhanced.css">
 
   <!-- Import map (no external JS frameworks required, but kept for extensibility) -->
   <script type="importmap">
@@ -75,8 +74,104 @@
   </section>
 
   <main class="container">
-    <!-- content unchanged -->
-    {{ super() if false }}
+    <section class="filters">
+      <div class="filter-row">
+        <div class="filter-toolbar" id="categoryToolbar" role="toolbar" aria-label="Категории">
+          <button class="chip" data-cat="all" aria-pressed="true">Все</button>
+          <button class="chip" data-cat="dota2">Dota 2</button>
+          <button class="chip" data-cat="fnaf">FNAF</button>
+          <button class="chip" data-cat="classic">Классика</button>
+          <button class="chip" data-cat="guides">Гайды</button>
+          <button class="chip" data-cat="market">Маркет</button>
+          <button class="chip" data-cat="lore">Лор</button>
+          <button class="chip" data-cat="strategy">Стратегия</button>
+          <button class="chip" data-cat="guides">Гайд</button>
+          <button class="chip" data-cat="platformer">Платформер</button>
+          <button class="chip" data-cat="analysis">Анализ</button>
+          <button class="chip" data-cat="indie">Инди</button>
+        </div>
+
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <label style="font-size:13px;color:var(--muted);margin:0 6px 0 0">Сортировка:</label>
+          <div class="sort-menu" id="sortMenu" role="menu" aria-label="Сортировка">
+            <button class="chip" data-sort="popular" aria-pressed="true">Популярные</button>
+            <button class="chip" data-sort="price-asc">Цена ↑</button>
+            <button class="chip" data-sort="price-desc">Цена ↓</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="product-grid" aria-live="polite">
+      <!-- Product cards inserted here by JS -->
+    </section>
+
+    <!-- Marketplace: user-created listings -->
+    <section id="marketplace" class="info" style="margin-top:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h2 style="margin:0">Маркет публикаций</h2>
+        <button id="openListForm" class="btn ghost">Опубликовать книгу</button>
+      </div>
+
+      <div id="listingForm" style="display:none;margin-top:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02)">
+        <div style="display:grid;grid-template-columns:1fr 120px;gap:8px;align-items:center">
+          <input id="listTitle" placeholder="Название книги / гайда" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="listPrice" placeholder="Цена, ₽" type="number" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="listGame" placeholder="Игра / тема (Dota 2, Silent Hill...)" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="listThumb" placeholder="URL обложки" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <div style="display:flex;gap:8px">
+            <button id="createListing" class="btn primary">Опубликовать</button>
+            <button id="cancelListing" class="btn ghost">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="marketGrid" class="product-grid" style="margin-top:12px;">
+        <!-- listings injected by JS -->
+      </div>
+    </section>
+
+    <!-- Author/Guide submissions (accounts marketplace repurposed to "Авторские издания") -->
+    <section id="accountsMarketplace" class="info" style="margin-top:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h2 style="margin:0">Авторские издания</h2>
+        <button id="openAccListForm" class="btn ghost">Опубликовать издание</button>
+      </div>
+
+      <div id="accListingForm" style="display:none;margin-top:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02)">
+        <div style="display:grid;grid-template-columns:1fr 120px;gap:8px;align-items:center">
+          <input id="accListTitle" placeholder="Название издания / сборника" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="accListPrice" placeholder="Цена, ₽" type="number" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="accListGames" placeholder="Темы / игры (Dota2, Silent Hill...)" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <input id="accListThumb" placeholder="URL обложки" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+          <div style="display:flex;gap:8px">
+            <button id="createAccListing" class="btn primary">Опубликовать</button>
+            <button id="cancelAccListing" class="btn ghost">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="accMarketGrid" class="product-grid" style="margin-top:12px;">
+        <!-- account/author listings injected by JS -->
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="info" style="margin-top:18px;">
+      <h2>Отзывы клиентов</h2>
+      <div id="reviewsGrid" style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+        <!-- reviews injected by JS -->
+      </div>
+    </section>
+
+    <section class="info">
+      <h2>Почему ЦифраМаркет?</h2>
+      <ul>
+        <li>Электронные издания высокого качества</li>
+        <li>Гайды, артбуки и аналитика по играм</li>
+        <li>Поддержка авторов и безопасные покупки</li>
+      </ul>
+    </section>
   </main>
 
   <!-- Cart / Checkout Modal -->
@@ -98,12 +193,15 @@
           <input id="checkoutEmail" placeholder="Email для получения ссылок" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
           <div id="paymentMethodInputGroup">
             <label style="display:block;font-size:13px;color:var(--muted);margin:0 0 6px">Основной способ оплаты:</label>
+            <!-- Chips for main methods: Bank Card, PayPal, Qiwi, COD -->
             <div id="mainPaymentMethods" class="payment-chips">
               <button class="payment-chip selected" data-method="card">Банковская карта</button>
               <button class="payment-chip" data-method="paypal">PayPal</button>
               <button class="payment-chip" data-method="qiwi">Qiwi</button>
               <button class="payment-chip" data-method="cod">Оплата при получении</button>
             </div>
+
+            <!-- Detailed options for 'card' payment, visible by default or when card is selected -->
             <div id="cardSpecificPayments" style="margin-top:10px;display:block;">
               <label style="display:block;font-size:13px;color:var(--muted);margin:0 0 6px">Выберите систему:</label>
               <div id="cardPaymentMethods" class="payment-chips">
@@ -113,6 +211,7 @@
                 <button class="payment-chip" data-method="card-yoomoney">ЮМoney</button>
               </div>
             </div>
+            
             <input id="paymentMethodHidden" type="hidden" value="card-visa">
           </div>
           <input id="paymentData" placeholder="Данные оплаты (Номер карты/Аккаунт)" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
@@ -159,6 +258,7 @@
         <button id="closeChat" class="btn icon">×</button>
       </header>
       <div id="chatBody" class="modal-body" style="padding:8px;flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;background:transparent">
+        <!-- messages -->
       </div>
       <footer style="display:flex;gap:8px;align-items:center;padding-top:6px">
         <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
@@ -169,46 +269,6 @@
 
   <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
-    <button class="mobile-nav-item" data-page="home" onclick="location.href='/'">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-      </svg>
-      <span>Главная</span>
-    </button>
-    <button class="mobile-nav-item" data-page="search" onclick="document.getElementById('search').focus()">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="m21 21-4.35-4.35"></path>
-      </svg>
-      <span>Поиск</span>
-    </button>
-    <button class="mobile-nav-item" data-page="cart" onclick="location.href='/cart.html'">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <circle cx="9" cy="21" r="1"></circle>
-        <circle cx="20" cy="21" r="1"></circle>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-      </svg>
-      <span>Корзина</span>
-    </button>
-    <button class="mobile-nav-item" data-page="favorites" onclick="location.href='/favorite.html'">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-      </svg>
-      <span>Избранное</span>
-    </button>
-    <button class="mobile-nav-item" data-page="account" onclick="location.href='/account.html'">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
-      </svg>
-      <span>Аккаунт</span>
-    </button>
-  </nav>
-
   <script type="module" src="/app/static/js/app.js"></script>
-  <script type="module" src="/app/static/js/mobile.js"></script>
 </body>
 </html>
