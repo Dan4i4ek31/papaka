@@ -16,7 +16,7 @@ from app.router import (
     favorite_router,
     review_router,
     chat_message_router,
-    admin_router  # НОВЫЙ ИМПОРТ
+    admin_router
 )
 from app.exceptions.handler import setup_exception_handlers
 import logging
@@ -27,12 +27,10 @@ from pathlib import Path
 
 load_dotenv()
 
-# Определите пути
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = os.path.join(BASE_DIR, "app", "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "app", "static")
 
-# СОЗДАЕМ ПАПКИ, ЕСЛИ ОНИ НЕ СУЩЕСТВУЮТ
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
 
@@ -46,9 +44,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifespan менеджер для управления событиями запуска и остановки приложения.
-    """
     logger.info("🚀 Starting E-Commerce API...")
     
     try:
@@ -76,10 +71,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Подключите статические файлы (CSS, JS, изображения)
 app.mount("/app/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Настройте шаблоны
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 app.add_middleware(
@@ -101,7 +94,7 @@ app.include_router(cart_router.router)
 app.include_router(favorite_router.router)
 app.include_router(review_router.router)
 app.include_router(chat_message_router.router)
-app.include_router(admin_router.router)  # ПОДКЛЮЧЕНИЕ АДМИН-МАРШРУТОВ
+app.include_router(admin_router.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -128,7 +121,7 @@ async def read_page4(request: Request):
 async def read_page5(request: Request):
     return templates.TemplateResponse("favorite.html", {"request": request})
 
-@app.get("/admin.html", response_class=HTMLResponse)  # НОВЫЙ МАРШРУТ ДЛЯ АДМИН-ПАНЕЛИ
+@app.get("/admin.html", response_class=HTMLResponse)
 async def read_admin_page(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
@@ -147,5 +140,5 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8001,
-        reload=False  
+        reload=False
     )
