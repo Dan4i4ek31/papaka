@@ -1,5 +1,30 @@
 // /app/static/js/api.js
-const API_BASE_URL = 'http://localhost:8000';
+
+/**
+ * Автоматическое определение API URL
+ * Работает как на localhost, так и на удаленных серверах
+ * Совместимо с телефонами и всеми устройствами
+ */
+function getApiBaseUrl() {
+  // Если текущий хост - localhost, используем :8000
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  
+  // Иначе используем текущий хост и порт (для удаленных серверов и телефонов)
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port ? `:${window.location.port}` : '';
+  
+  return `${protocol}//${hostname}${port}`;
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Логируем для отладки
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('Current hostname:', window.location.hostname);
+console.log('Current URL:', window.location.href);
 
 class ApiService {
   static async login(email, password) {
@@ -7,7 +32,8 @@ class ApiService {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-      }
+      },
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -22,7 +48,9 @@ class ApiService {
     let roleId = 2;
     
     try {
-      const rolesResponse = await fetch(`${API_BASE_URL}/roles/`);
+      const rolesResponse = await fetch(`${API_BASE_URL}/roles/`, {
+        credentials: 'include'
+      });
       if (rolesResponse.ok) {
         const roles = await rolesResponse.json();
         const defaultRole = roles.find(role => 
@@ -46,7 +74,8 @@ class ApiService {
       body: JSON.stringify({
         ...userData,
         role_id: roleId
-      })
+      }),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -58,7 +87,9 @@ class ApiService {
   }
   
   static async getUserProfile(userId) {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      credentials: 'include'
+    });
     if (!response.ok) {
       throw new Error('Не удалось получить данные пользователя');
     }
@@ -71,7 +102,8 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(userData)
+      body: JSON.stringify(userData),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -88,7 +120,9 @@ class ApiService {
       url += `&category=${encodeURIComponent(category)}`;
     }
     
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      credentials: 'include'
+    });
     if (!response.ok) {
       throw new Error('Не удалось получить список товаров');
     }
@@ -97,7 +131,9 @@ class ApiService {
   }
   
   static async getCartItems(userId) {
-    const response = await fetch(`${API_BASE_URL}/carts/user/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/carts/user/${userId}`, {
+      credentials: 'include'
+    });
     if (!response.ok) {
       throw new Error('Не удалось получить корзину');
     }
