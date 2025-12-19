@@ -3,7 +3,7 @@
 /**
  * Автоматическое определение API URL
  * Работает как на localhost, так и на удаленных серверах
- * Совместимо с телефонами и всеми устройствами
+ * Совместимо с телефонами и всем устройствами
  */
 function getApiBaseUrl() {
   // Если текущий хост - localhost, используем :8000
@@ -27,8 +27,22 @@ console.log('Current hostname:', window.location.hostname);
 console.log('Current URL:', window.location.href);
 
 class ApiService {
+  /**
+   * Автентификация пользователя
+   * Поддерживает query параметры и POST
+   */
   static async login(email, password) {
-    const response = await fetch(`${API_BASE_URL}/users/authenticate?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+    console.log('🔍 Аттемпт авторизации:', email);
+    
+    // Отправляем email и password как query parameters
+    const params = new URLSearchParams();
+    params.append('email', email);
+    params.append('password', password);
+    
+    const url = `${API_BASE_URL}/users/authenticate?${params.toString()}`;
+    console.log('🌐 УРЛ:', url);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -36,14 +50,25 @@ class ApiService {
       credentials: 'include'
     });
     
+    console.log('🔍 Ответ от сервера:', response.status, response.statusText);
+    
     if (!response.ok) {
-      throw new Error('Ошибка авторизации');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('✖️ Ошибка авторизации:', errorData);
+      throw new Error(errorData.detail || 'Ошибка авторизации');
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('✅ Успешная авторизация:', data);
+    return data;
   }
   
+  /**
+   * Регистрация нового пользователя
+   */
   static async register(userData) {
+    console.log('👆 Попытка регистрации:', userData.email);
+    
     // Получаем роль по умолчанию
     let roleId = 2;
     
@@ -59,11 +84,20 @@ class ApiService {
         );
         if (defaultRole) {
           roleId = defaultRole.id;
+          console.log('🕒 Найдена роль:', roleId);
         }
       }
     } catch (error) {
-      console.warn('Не удалось получить список ролей', error);
+      console.warn('⚠️ Не удалось получить список ролей', error);
     }
+    
+    // Подготавливаем данные для регистрации
+    const registrationData = {
+      ...userData,
+      role_id: roleId
+    };
+    
+    console.log('📄 Отправляем данные регистрации:', registrationData);
     
     const response = await fetch(`${API_BASE_URL}/users/`, {
       method: 'POST',
@@ -71,19 +105,21 @@ class ApiService {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        ...userData,
-        role_id: roleId
-      }),
+      body: JSON.stringify(registrationData),
       credentials: 'include'
     });
     
+    console.log('🔍 Ответ регистрации:', response.status);
+    
     if (!response.ok) {
-      const error = await response.json();
-      throw error;
+      const errorData = await response.json().catch(() => ({}));
+      console.error('✖️ Ошибка регистрации:', errorData);
+      throw errorData;
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('✅ Успешная регистрация:', data);
+    return data;
   }
   
   static async getUserProfile(userId) {
