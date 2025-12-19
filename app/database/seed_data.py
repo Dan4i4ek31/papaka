@@ -1,8 +1,3 @@
-"""
-Скрипт для инициализации ролей и тестовых аккаунтов в базе данных.
-Запуск: python -m app.database.seed_data
-"""
-
 from sqlalchemy.orm import Session
 from app.database.database import engine, Base, SessionLocal
 from app.models.roles import RoleModel
@@ -10,31 +5,23 @@ from app.models.users import UserModel
 from passlib.context import CryptContext
 from datetime import datetime
 
-# Контекст для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    """Хеширует пароль"""
     return pwd_context.hash(password)
 
 
 def seed_database():
-    """
-    Инициализирует базу данных с ролями и тестовыми аккаунтами.
-    """
-    # Создаем таблицы если их нет
     Base.metadata.create_all(bind=engine)
     
     db: Session = SessionLocal()
     
     try:
-        # ===== ШАГИ 1: ДОБАВЛЯЕМ РОЛИ =====
         print("\n" + "="*60)
-        print("🔧 ИНИЦИАЛИЗАЦИЯ БД: Добавление ролей")
+        print("\ud83d\udd27 ИНИЦИАЛИЗАЦИЯ БД: Добавление ролей")
         print("="*60)
         
-        # Проверяем, существуют ли роли
         admin_role = db.query(RoleModel).filter(RoleModel.name == "admin").first()
         user_role = db.query(RoleModel).filter(RoleModel.name == "user").first()
         
@@ -54,22 +41,19 @@ def seed_database():
         
         db.commit()
         
-        # ===== ШАГИ 2: ДОБАВЛЯЕМ ТЕСТОВЫЕ АККАУНТЫ =====
         print("\n" + "="*60)
         print("👤 ИНИЦИАЛИЗАЦИЯ БД: Добавление тестовых аккаунтов")
         print("="*60)
         
-        # Получаем свежие роли
         admin_role = db.query(RoleModel).filter(RoleModel.name == "admin").first()
         user_role = db.query(RoleModel).filter(RoleModel.name == "user").first()
         
-        # Админ аккаунт
         admin_user = db.query(UserModel).filter(UserModel.email == "admin@example.com").first()
         if not admin_user:
             admin_user = UserModel(
                 name="Администратор",
                 email="admin@example.com",
-                hashed_password=hash_password("admin123"),  # Пароль: admin123
+                hashed_password=hash_password("admin123"),
                 role_id=admin_role.id
             )
             db.add(admin_user)
@@ -81,13 +65,12 @@ def seed_database():
         else:
             print(f"⏭️  Админ аккаунт уже существует (ID: {admin_user.id})")
         
-        # Обычный пользователь 1
         user1 = db.query(UserModel).filter(UserModel.email == "user1@example.com").first()
         if not user1:
             user1 = UserModel(
                 name="Иван Петров",
                 email="user1@example.com",
-                hashed_password=hash_password("user123"),  # Пароль: user123
+                hashed_password=hash_password("user123"),
                 role_id=user_role.id
             )
             db.add(user1)
@@ -99,13 +82,12 @@ def seed_database():
         else:
             print(f"⏭️  Пользователь user1@example.com уже существует (ID: {user1.id})")
         
-        # Обычный пользователь 2
         user2 = db.query(UserModel).filter(UserModel.email == "user2@example.com").first()
         if not user2:
             user2 = UserModel(
                 name="Мария Сидорова",
                 email="user2@example.com",
-                hashed_password=hash_password("user456"),  # Пароль: user456
+                hashed_password=hash_password("user456"),
                 role_id=user_role.id
             )
             db.add(user2)
@@ -117,7 +99,6 @@ def seed_database():
         else:
             print(f"⏭️  Пользователь user2@example.com уже существует (ID: {user2.id})")
         
-        # ===== ШАГИ 3: ВЫВОД ИНФОРМАЦИИ =====
         print("\n" + "="*60)
         print("📊 ИТОГОВАЯ ИНФОРМАЦИЯ")
         print("="*60)
