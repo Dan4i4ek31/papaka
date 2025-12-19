@@ -1,8 +1,8 @@
 :root{
-  --bg: #0f1724; /* deep navy */
+  --bg: #0f1724;
   --card: linear-gradient(180deg, rgba(47,60,120,0.14), rgba(95,56,140,0.06));
-  --accent-1: #2b5cff; /* blue */
-  --accent-2: #7b61ff; /* violet */
+  --accent-1: #2b5cff;
+  --accent-2: #7b61ff;
   --muted: #98a0bf;
   --surface: #0b1020;
   --glass: rgba(255,255,255,0.03);
@@ -30,7 +30,6 @@ body{
   padding:12px;
 }
 
-/* Header */
 .site-header{
   background:linear-gradient(90deg, rgba(43,92,255,0.08), rgba(123,97,255,0.06));
   border-bottom:1px solid rgba(255,255,255,0.03);
@@ -51,17 +50,16 @@ body{
   max-width:72px;
   max-height:72px;
   border-radius:10px;
-  object-fit:contain; /* preserve full image without cropping */
+  object-fit:contain;
   background:transparent;
   border:0;
   box-shadow:none;
   display:block;
-  flex-shrink:0; /* prevent logo from collapsing and overlapping other header elements */
+  flex-shrink:0;
 }
 .brand h1{margin:0;font-size:18px;letter-spacing:0.4px}
 .tag{margin:0;font-size:12px;color:var(--muted)}
 
-/* Preview hero */
 .preview-hero{
   background:linear-gradient(90deg, rgba(43,92,255,0.03), rgba(123,97,255,0.02));
   border-bottom:1px solid rgba(255,255,255,0.02);
@@ -107,7 +105,6 @@ body{
   flex:1 1 auto;
 }
 
-/* Nav */
 .nav{display:flex;gap:12px;align-items:center}
 .search{
   padding:10px 12px;
@@ -136,7 +133,6 @@ body{
 .profile-avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
 .auth-mini{font-size:13px;color:var(--muted)}
 
-/* Filters */
 .filters{margin:18px 0}
 .filter-row{display:flex;gap:12px;align-items:center}
 .filter-row label{font-size:13px;color:var(--muted)}
@@ -144,7 +140,6 @@ body{
   margin-left:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)
 }
 
-/* Compact category chips and sort menu */
 .filter-toolbar, .sort-menu{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .chip{
   padding:8px 10px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text);cursor:pointer;font-size:13px;
@@ -160,14 +155,12 @@ body{
   .sort-menu{margin-left:0}
 }
 
-/* Product grid */
 .product-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
   gap:14px;
 }
 
-/* Card */
 .card{
   background:var(--glass);
   border:1px solid rgba(255,255,255,0.03);
@@ -177,8 +170,8 @@ body{
   flex-direction:column;
   gap:10px;
   transition:transform .14s ease, box-shadow .14s ease;
-  height:100%;                 /* ensure card fills grid cell */
-  justify-content:flex-start;  /* keep content stacking; actions will be pushed down by margin:auto */
+  height:100%;
+  justify-content:flex-start;
 }
 .card:hover{transform:translateY(-6px);box-shadow:0 6px 20px rgba(15,20,36,0.6)}
 .card .media{
@@ -188,17 +181,15 @@ body{
 .card h3{margin:0;font-size:15px}
 .meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
 .price{font-weight:700;color:var(--text)}
-/* ensure action row stays at the bottom of the card */
 .actions{
   display:flex;
   gap:8px;
   align-items:center;
   justify-content:space-between;
-  margin-top:auto; /* push actions to the bottom */
+  margin-top:auto;
 }
 .tag-pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px;color:var(--muted)}
 
-/* Modal */
 .modal{
   position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.8));
   z-index:60;padding:20px;
@@ -221,15 +212,12 @@ body{
 .qty{display:flex;gap:6px;align-items:center;margin-top:6px}
 .qty button{padding:6px;border-radius:6px;border:0;background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer}
 
-/* Toast */
 .toast{
   position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:white;padding:10px 14px;border-radius:10px;box-shadow:0 8px 30px rgba(11,12,20,0.6);display:none;z-index:70;
 }
 
-/* Info */
 .info{margin-top:22px;padding:14px;border-radius:12px;background:linear-gradient(90deg, rgba(43,92,255,0.03), rgba(123,97,255,0.02));border:1px solid rgba(255,255,255,0.02)}
 
-/* Responsive */
 @media (max-width:640px){
   .header-inner{flex-direction:column;align-items:flex-start;gap:10px}
   .search{width:100%}
@@ -240,7 +228,6 @@ body{
   .preview-title{order:1;font-size:18px;padding-left:0}
 }
 
-/* Mobile adjustments for small devices (improved touch, layout and single-screen fit) */
 @media (max-width:420px){
   :root{
     --radius:8px;
@@ -249,22 +236,18 @@ body{
     padding:12px;
     max-width:100%;
   }
-  /* make more room at bottom for floating UI */
   body{padding-bottom:68px;}
 
-  /* Lower the sticky header slightly so it sits below the top edge */
   .site-header{top:12px}
-  /* Reduced header sizing for tighter mobile fit */
   .header-inner{padding:6px 0;gap:6px}
   .logo{width:40px;height:40px}
   .brand h1{font-size:12px;margin-top:0}
-  .tag{font-size:11px;color:var(--muted);display:none} /* hide subtitle to save space */
+  .tag{font-size:11px;color:var(--muted);display:none}
   .nav{width:100%;display:flex;flex-wrap:wrap;gap:6px}
   .search{min-width:0;flex:1 1 100%;padding:8px;border-radius:8px;font-size:13px}
   .btn{padding:8px 10px;min-height:40px;min-width:40px;border-radius:8px;font-size:13px}
   .btn.icon{padding:6px 8px;font-size:15px}
   .profile-avatar{width:30px;height:30px}
-  /* Compact preview */
   .preview-inner{min-height:88px;padding:8px;gap:8px}
   .preview-thumbs{gap:6px}
   .preview-thumbs img{width:64px;height:40px}
@@ -287,13 +270,10 @@ body{
   .modal-body{max-height:50vh}
   .toast{left:12px;right:12px;bottom:12px;width:auto;font-size:13px;padding:8px 10px}
   .info{padding:10px}
-  /* Ensure preview, main content and header fit one screen height more comfortably */
   main.container{padding:8px 12px}
-  /* Increase hit area for favorites floating button and move a bit up */
   #favBtn{padding:10px 12px;right:12px;bottom:88px}
 }
 
-/* Themed select for checkout/payment (matches site accents) */
 .themed-select{
   appearance: none;
   -webkit-appearance: none;
@@ -306,12 +286,10 @@ body{
   font-size: 14px;
   box-shadow: 0 6px 18px rgba(11,12,20,0.5);
 }
-/* smaller variant used on mobile */
 @media (max-width:420px){
   .themed-select{ padding:8px 10px; border-radius:8px; font-size:13px; }
 }
 
-/* Custom Payment Chips */
 .payment-chips{
   display: flex;
   flex-wrap: wrap;
@@ -341,7 +319,7 @@ body{
 @media (max-width:420px){
   .payment-chip{ padding:8px 10px; font-size:13px; }
 }
-/* Стили для профиля пользователя */
+
 .profile-btn {
   display: flex;
   align-items: center;
@@ -373,7 +351,6 @@ body{
   background-position: center;
 }
 
-/* Стили для иконок глаз (если используете feather icons) */
 .feather.eye, .feather.eye-off {
   width: 18px;
   height: 18px;
@@ -384,7 +361,6 @@ body{
   fill: none;
 }
 
-/* Адаптивные стили для мобильных */
 @media (max-width: 768px) {
   .profile-btn span {
     display: none;
@@ -400,7 +376,6 @@ body{
   }
 }
 
-/* Добавим в styles.css или прямо в index.html */
 .btn.ghost.active-chip {
   background: rgba(var(--accent-1-rgb), 0.1) !important;
   color: var(--accent-1) !important;
