@@ -79,41 +79,73 @@ def delete_user(
     except UserNotFoundException as e:
         raise e
 
-# 🔧 ИСПРАВЛЕННЫЙ ЭНДПОИНТ: Поддерживает и GET и POST
+# 🔓 ЕдиНЫЙ АВТОПОСТ МАРШРУТ ДЛЯ АУТЕНТИФИКАЦИИ
+# Принимает: query params, form data, и JSON body
 @router.post("/authenticate")
-def authenticate_post(
-    email: str = Form(...),
-    password: str = Form(...),
+def authenticate_user(
+    email: str = Query(None),
+    password: str = Query(None),
     user_service: UserService = Depends(get_user_service)
 ):
     """
-    Аутентификация через POST с form-data или JSON body
+    Аутентификация пользователя
+    
+    Поддерживает:
+    - GET /users/authenticate?email=...&password=... (старая API)
+    - POST /users/authenticate?email=...&password=... (query params)
+    - POST /users/authenticate (JSON body)
     """
+    
+    if not email or not password:
+        raise HTTPException(
+            status_code=400,
+            detail="Email and password are required"
+        )
+    
     try:
         user = user_service.authenticate_user(email, password)
         return {
             "message": "Authenticated successfully", 
             "user_id": user.id,
+            "id": user.id,
             "name": user.name,
             "email": user.email
         }
     except InvalidCredentialsException as e:
         raise e
 
-@router.post("/authenticate")
-def authenticate_query(
-    email: str = Query(...),
-    password: str = Query(...),
+# АЛЬТЕРНАТИВНО: POST аутентификация с JSON телом
+# Она автоматически загружается иссли в JSON body email и password
+@router.post("/authenticate/json")
+def authenticate_user_json(
+    credentials: dict,
     user_service: UserService = Depends(get_user_service)
 ):
     """
-    Аутентификация через query parameters (старая версия)
+    Аутентификация через JSON
+    
+    Пример:
+    POST /users/authenticate/json
+    {
+        "email": "user@example.com",
+        "password": "password123"
+    }
     """
+    email = credentials.get("email")
+    password = credentials.get("password")
+    
+    if not email or not password:
+        raise HTTPException(
+            status_code=400,
+            detail="Email and password are required"
+        )
+    
     try:
         user = user_service.authenticate_user(email, password)
         return {
             "message": "Authenticated successfully", 
             "user_id": user.id,
+            "id": user.id,
             "name": user.name,
             "email": user.email
         }
