@@ -235,8 +235,21 @@
     }
   </style>
 
+  <script src="/app/static/js/api.js"></script>
   <script>
-    const API_BASE_URL = 'http://localhost:8000';
+    // Используем динамическое определение API URL из api.js
+    // Если api.js не загружен, используем это значение
+    let API_BASE_URL = (typeof window.API_BASE_URL !== 'undefined') ? window.API_BASE_URL : (() => {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+      }
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      return `${protocol}//${hostname}${port}`;
+    })();
+    
+    console.log('🌐 Auth page using API_BASE_URL:', API_BASE_URL);
     
     // DOM элементы
     const loginToggle = document.getElementById('login-toggle');
@@ -249,6 +262,8 @@
     
     // Инициализация
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('📄 Auth page loaded');
+      
       // Переключение между формами входа и регистрации
       loginToggle.addEventListener('click', () => switchForm('login'));
       registerToggle.addEventListener('click', () => switchForm('register'));
@@ -354,25 +369,34 @@
         btnText.textContent = 'Вход...';
         submitBtn.disabled = true;
         
+        console.log('🔐 Attempting login with:', email);
+        
         // Отправляем запрос на аутентификацию
         const response = await fetch(`${API_BASE_URL}/users/authenticate?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
-          }
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          credentials: 'include',
+          mode: 'cors'
         });
         
+        console.log('📊 Login response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Ошибка аутентификации');
+          const errorData = await response.json().catch(() => ({ detail: 'Ошибка аутентификации' }));
+          throw new Error(errorData.detail || 'Ошибка аутентификации');
         }
         
         const data = await response.json();
+        console.log('✅ Login successful:', data);
         
         showMessage(`Добро пожаловать, ${data.name}!`, 'success');
         
         // Сохраняем данные пользователя
         const userData = {
-          id: data.user_id,
+          id: data.user_id || data.id,
           name: data.name,
           email: data.email
         };
@@ -392,8 +416,8 @@
         }, 1500);
         
       } catch (error) {
-        console.error('Ошибка при входе:', error);
-        showMessage('Неверный email или пароль', 'error');
+        console.error('❌ Login error:', error);
+        showMessage('Неверный email или пароль: ' + error.message, 'error');
       } finally {
         // Восстановить кнопку
         const submitBtn = loginForm.querySelector('.btn');
@@ -442,11 +466,16 @@
         btnText.textContent = 'Регистрация...';
         submitBtn.disabled = true;
         
+        console.log('👤 Attempting registration for:', email);
+        
         // Получаем список ролей, чтобы присвоить пользователю роль по умолчанию
         let roleId = 2; // Значение по умолчанию для обычного пользователя
         
         try {
-          const rolesResponse = await fetch(`${API_BASE_URL}/roles/`);
+          const rolesResponse = await fetch(`${API_BASE_URL}/roles/`, {
+            credentials: 'include',
+            mode: 'cors'
+          });
           if (rolesResponse.ok) {
             const roles = await rolesResponse.json();
             // Ищем роль "user" или "client"
@@ -457,10 +486,11 @@
             );
             if (defaultRole) {
               roleId = defaultRole.id;
+              console.log('🎯 Found default role:', roleId);
             }
           }
         } catch (rolesError) {
-          console.warn('Не удалось получить список ролей, используется значение по умолчанию', rolesError);
+          console.warn('⚠️ Could not fetch roles:', rolesError);
         }
         
         // Отправляем запрос на создание пользователя
@@ -475,11 +505,16 @@
             email: email,
             password: password,
             role_id: roleId
-          })
+          }),
+          credentials: 'include',
+          mode: 'cors'
         });
+        
+        console.log('📊 Registration response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ Registration successful:', data);
           showMessage('Регистрация успешна! Теперь вы можете войти в систему.', 'success');
           
           // Переключаемся на форму входа
@@ -491,18 +526,20 @@
           }, 2000);
         } else {
           // Обработка ошибок от сервера
+          const errorData = await response.json().catch(() => ({ detail: 'Неизвестная ошибка' }));
+          console.error('❌ Registration error:', errorData);
+          
           if (response.status === 409) {
             showMessage('Пользователь с таким email уже существует', 'error');
           } else if (response.status === 422) {
-            const errorData = await response.json();
-            showMessage('Ошибка валидации данных', 'error');
+            showMessage('Ошибка валидации данных: ' + (errorData.detail || ''), 'error');
           } else {
-            showMessage('Ошибка при регистрации', 'error');
+            showMessage('Ошибка при регистрации: ' + (errorData.detail || ''), 'error');
           }
         }
       } catch (error) {
-        console.error('Ошибка при регистрации:', error);
-        showMessage('Ошибка соединения с сервером', 'error');
+        console.error('❌ Registration exception:', error);
+        showMessage('Ошибка соединения с сервером: ' + error.message, 'error');
       } finally {
         // Восстановить кнопку
         const submitBtn = registerForm.querySelector('.btn');
