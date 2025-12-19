@@ -5,20 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ЦифраМаркет</title>
 
-  <!-- Favicons -->
   <link rel="icon" href="assets/key-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/key-icon.png">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 
-  <!-- Simple icon set -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="/app/static/css/styles.css">
 
-  <!-- Import map (no external JS frameworks required, but kept for extensibility) -->
   <script type="importmap">
   {
     "imports": {}
@@ -32,7 +27,7 @@
         <img src="/app/static/css/Icona.png" alt="logo" class="logo" onerror="this.style.display='none'">
         <div>
           <h1>ЦифраМаркет</h1>
-          <p class="tag">Электронные книги и гиды по играм</p>
+          <p class="tag">Электронные книги и гайды по играм</p>
         </div>
       </div>
 
@@ -58,7 +53,6 @@
     </div>
   </header>
 
-  <!-- Preview hero inserted here -->
   <section class="preview-hero">
     <div class="container preview-inner">
       <div class="preview-thumbs" aria-hidden="true">
@@ -102,10 +96,8 @@
     </section>
 
     <section id="products" class="product-grid" aria-live="polite">
-      <!-- Product cards inserted here by JS -->
     </section>
 
-    <!-- Marketplace: user-created listings -->
     <section id="marketplace" class="info" style="margin-top:18px;">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
         <h2 style="margin:0">Маркет публикаций</h2>
@@ -126,11 +118,9 @@
       </div>
 
       <div id="marketGrid" class="product-grid" style="margin-top:12px;">
-        <!-- listings injected by JS -->
       </div>
     </section>
 
-    <!-- Author/Guide submissions (accounts marketplace repurposed to "Авторские издания") -->
     <section id="accountsMarketplace" class="info" style="margin-top:18px;">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
         <h2 style="margin:0">Авторские издания</h2>
@@ -151,15 +141,12 @@
       </div>
 
       <div id="accMarketGrid" class="product-grid" style="margin-top:12px;">
-        <!-- account/author listings injected by JS -->
       </div>
     </section>
 
-    <!-- Reviews -->
     <section id="reviews" class="info" style="margin-top:18px;">
       <h2>Отзывы клиентов</h2>
       <div id="reviewsGrid" style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
-        <!-- reviews injected by JS -->
       </div>
     </section>
 
@@ -173,7 +160,6 @@
     </section>
   </main>
 
-  <!-- Cart / Checkout Modal -->
   <div id="cartModal" class="modal" aria-hidden="true">
     <div class="modal-panel">
       <header class="modal-header">
@@ -181,10 +167,8 @@
         <button id="closeCart" class="btn icon">×</button>
       </header>
       <div class="modal-body" id="cartItems">
-        <!-- Items -->
       </div>
 
-      <!-- Checkout form (hidden until user proceeds) -->
       <div id="checkoutForm" style="display:none;padding:12px;border-top:1px solid rgba(255,255,255,0.02);">
         <h4 style="margin:6px 0 8px">Данные покупателя и оплата</h4>
         <div style="display:grid;gap:8px">
@@ -192,7 +176,6 @@
           <input id="checkoutEmail" placeholder="Email для получения ссылок" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
           <div id="paymentMethodInputGroup">
             <label style="display:block;font-size:13px;color:var(--muted);margin:0 0 6px">Основной способ оплаты:</label>
-            <!-- Chips for main methods: Bank Card, PayPal, Qiwi, COD -->
             <div id="mainPaymentMethods" class="payment-chips">
               <button class="payment-chip selected" data-method="card">Банковская карта</button>
               <button class="payment-chip" data-method="paypal">PayPal</button>
@@ -200,14 +183,13 @@
               <button class="payment-chip" data-method="cod">Оплата при получении</button>
             </div>
 
-            <!-- Detailed options for 'card' payment, visible by default or when card is selected -->
             <div id="cardSpecificPayments" style="margin-top:10px;display:block;">
               <label style="display:block;font-size:13px;color:var(--muted);margin:0 0 6px">Выберите систему:</label>
               <div id="cardPaymentMethods" class="payment-chips">
                 <button class="payment-chip selected" data-method="card-visa">Visa/Mastercard</button>
                 <button class="payment-chip" data-method="card-apple">Apple Pay</button>
                 <button class="payment-chip" data-method="card-google">Google Pay</button>
-                <button class="payment-chip" data-method="card-yoomoney">ЮМoney</button>
+                <button class="payment-chip" data-method="card-yoomoney">ЮМоней</button>
               </div>
             </div>
             
@@ -231,7 +213,6 @@
     </div>
   </div>
 
-  <!-- Auth Modal -->
   <div id="authModal" class="modal" aria-hidden="true">
     <div class="modal-panel" style="max-width:420px">
       <header class="modal-header">
@@ -249,7 +230,6 @@
     </div>
   </div>
 
-  <!-- Chat Modal -->
   <div id="chatModal" class="modal" aria-hidden="true">
     <div class="modal-panel" style="max-width:500px;display:flex;flex-direction:column;height:70vh;padding:8px">
       <header class="modal-header">
@@ -257,7 +237,6 @@
         <button id="closeChat" class="btn icon">×</button>
       </header>
       <div id="chatBody" class="modal-body" style="padding:8px;flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;background:transparent">
-        <!-- messages -->
       </div>
       <footer style="display:flex;gap:8px;align-items:center;padding-top:6px">
         <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
@@ -266,7 +245,6 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
   <script type="module" src="/app/static/js/app.js"></script>
 </body>

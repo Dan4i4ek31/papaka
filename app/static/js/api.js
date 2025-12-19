@@ -1,4 +1,3 @@
-// /app/static/js/api.js
 const API_BASE_URL = 'http://localhost:8000';
 
 class ApiService {
@@ -18,7 +17,6 @@ class ApiService {
   }
   
   static async register(userData) {
-    // Получаем роль по умолчанию
     let roleId = 2;
     
     try {
@@ -81,7 +79,6 @@ class ApiService {
     return await response.json();
   }
   
-  // Методы для работы с товарами, корзиной и т.д.
   static async getProducts(skip = 0, limit = 100, category = null) {
     let url = `${API_BASE_URL}/products/?skip=${skip}&limit=${limit}`;
     if (category) {
@@ -106,7 +103,6 @@ class ApiService {
   }
 }
 
-// Экспортируем для использования в других файлах
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ApiService;
 } else {

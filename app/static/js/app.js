@@ -1,13 +1,9 @@
-// /app/static/js/app.js (ПОЛНЫЙ КОД С ИЗБРАННЫМ ПО АККАУНТУ)
-
-// Базовый URL API
 const API_BASE_URL = 'http://localhost:8000';
 
-// Состояние приложения
 const AppState = {
   user: null,
   cart: {},
-  favorites: [],  // Теперь содержит объекты избранного с сервера
+  favorites: [],
   products: [],
   marketListings: [],
   accountListings: [],
@@ -16,10 +12,6 @@ const AppState = {
   searchQuery: '',
   isLoading: false
 };
-
-// ====================
-// УТИЛИТЫ
-// ====================
 
 function formatPrice(price) {
   return price === 0 ? 'Бесплатно' : price.toLocaleString('ru-RU') + ' ₽';
@@ -32,7 +24,6 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   toast.className = 'toast';
   
-  // Добавляем класс типа
   if (type === 'success') {
     toast.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
   } else if (type === 'error') {
@@ -50,9 +41,6 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
-// ====================
-// API ФУНКЦИИ ДЛЯ ИЗБРАННОГО
-// ====================
 function updateFavoriteButtons() {
   document.querySelectorAll('[data-action="toggle-favorite"]').forEach(button => {
     const itemId = button.dataset.id;
@@ -74,11 +62,11 @@ async function loadUserFavorites() {
     if (!user) {
       AppState.favorites = [];
       updateFavCount();
-      updateFavoriteButtons(); // Обновляем кнопки
+      updateFavoriteButtons();
       return [];
     }
     
-    console.log('Загрузка избранного для пользователя:', user.id);
+    console.log('Загружка избранного для пользователя:', user.id);
     
     const response = await fetch(`${API_BASE_URL}/favorites/user/${user.id}?skip=0&limit=100`);
     
@@ -86,21 +74,20 @@ async function loadUserFavorites() {
       const favoritesData = await response.json();
       console.log('Загружены избранные с сервера:', favoritesData);
       
-      // Сохраняем полные объекты избранного
       AppState.favorites = favoritesData;
       
       updateFavCount();
-      updateFavoriteButtons(); // ОБНОВЛЯЕМ КНОПКИ ПОСЛЕ ЗАГРУЗКИ
-      console.log('Избранное загружено:', AppState.favorites.length, 'шт.');
+      updateFavoriteButtons();
+      console.log('Обработано:', AppState.favorites.length, 'шт.');
       return AppState.favorites;
     } else {
-      console.warn('Ошибка загрузки избранного:', response.status);
-      showToast('Ошибка загрузки избранного', 'error');
+      console.warn('Ошибка загружки избранного:', response.status);
+      showToast('Ошибка загружки избранного', 'error');
       return [];
     }
   } catch (error) {
-    console.error('Ошибка загрузки избранного:', error);
-    showToast('Ошибка загрузки избранного', 'error');
+    console.error('Ошибка загружки избранного:', error);
+    showToast('Ошибка загружки избранного', 'error');
     return [];
   }
 }
@@ -117,7 +104,6 @@ async function addToFavorites(itemId, itemType) {
       user_id: user.id
     };
     
-    // Определяем тип товара
     const id = parseInt(itemId);
     if (isNaN(id)) {
       throw new Error('Неверный ID товара');
@@ -146,7 +132,6 @@ async function addToFavorites(itemId, itemType) {
     if (response.ok) {
       const newFavorite = await response.json();
       
-      // Добавляем в локальное состояние
       AppState.favorites.push(newFavorite);
       
       updateFavCount();
@@ -155,7 +140,6 @@ async function addToFavorites(itemId, itemType) {
       return { success: true, isFavorited: true, favorite: newFavorite };
       
     } else if (response.status === 409) {
-      // Уже в избранном
       console.log('Товар уже в избранном');
       showToast('Уже в избранном', 'info');
       return { success: true, isFavorited: true };
@@ -179,11 +163,9 @@ async function removeFromFavorites(itemId, itemType) {
       return { success: false, isFavorited: true };
     }
     
-    // Находим запись избранного
     const favorite = findFavoriteByItem(itemId, itemType);
     if (!favorite) {
-      console.warn('Запись избранного не найдена локально');
-      // Все равно удаляем из локального состояния
+      console.warn('Запись избранного не найдена');
       removeFavoriteFromLocalState(itemId, itemType);
       return { success: true, isFavorited: false };
     }
@@ -193,7 +175,6 @@ async function removeFromFavorites(itemId, itemType) {
     });
     
     if (response.ok) {
-      // Удаляем из локального состояния
       const index = AppState.favorites.findIndex(f => f.id === favorite.id);
       if (index > -1) {
         AppState.favorites.splice(index, 1);
@@ -227,7 +208,6 @@ function findFavoriteByItem(itemId, itemType) {
   });
 }
 
-
 function removeFavoriteFromLocalState(itemId, itemType) {
   const favorite = findFavoriteByItem(itemId, itemType);
   if (favorite) {
@@ -240,7 +220,6 @@ function removeFavoriteFromLocalState(itemId, itemType) {
 }
 
 function isItemFavorited(itemId, itemType) {
-  // Приводим itemId к числу для сравнения
   const id = parseInt(itemId);
   if (isNaN(id)) return false;
   
@@ -259,12 +238,7 @@ function updateFavCount() {
   }
 }
 
-// ====================
-// ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО
-// ====================
-
 async function toggleFavorite(itemId, itemType) {
-  // Если пользователь не авторизован, показываем сообщение
   if (!AppState.user) {
     showToast('Для добавления в избранное нужно войти в аккаунт', 'error');
     return false;
@@ -273,41 +247,33 @@ async function toggleFavorite(itemId, itemType) {
   const isCurrentlyFavorited = isItemFavorited(itemId, itemType);
   
   if (isCurrentlyFavorited) {
-    // Удаляем из избранного
     const result = await removeFromFavorites(itemId, itemType);
-    return !result.isFavorited; // Возвращаем новое состояние
+    return !result.isFavorited;
   } else {
-    // Добавляем в избранное
     const result = await addToFavorites(itemId, itemType);
-    return result.isFavorited; // Возвращаем новое состояние
+    return result.isFavorited;
   }
 }
-
-// ====================
-// API ФУНКЦИИ ДЛЯ КОРЗИНЫ
-// ====================
 
 async function loadUserCart() {
   try {
     const user = AppState.user;
     if (!user) {
-      console.log('Пользователь не авторизован, используем локальную корзину');
+      console.log('Пользователь не авторизован');
       AppState.cart = AppState.cart || {};
       saveCart();
       updateCartCount();
       return null;
     }
     
-    console.log('Загрузка корзины пользователя:', user.id);
+    console.log('Загружка корзины пользователя:', user.id);
     
-    // Просто возвращаем существующую корзину без запросов к API
-    // (для отладки, потом вернете запросы)
     console.log('Текущая корзина:', AppState.cart);
     updateCartCount();
     return AppState.cart;
     
   } catch (error) {
-    console.error('Ошибка загрузки корзины:', error);
+    console.error('Ошибка загружки корзины:', error);
     return null;
   }
 }
@@ -333,7 +299,6 @@ async function fetchItemDetails(itemType, itemId) {
       const itemData = await response.json();
       console.log('Загружен товар с сервера:', itemData);
       
-      // Преобразуем данные в единый формат
       return {
         id: itemData.id?.toString() || itemId,
         title: itemData.title || 'Без названия',
@@ -341,12 +306,11 @@ async function fetchItemDetails(itemType, itemId) {
         price: itemData.price || 0,
         thumb: itemData.image_url || itemData.thumbnail || itemData.thumb || 'https://via.placeholder.com/160x90',
         category: itemData.category || itemData.game_topic || itemData.topic || 'Товар',
-        // Сохраняем оригинальные данные
         raw_data: itemData
       };
     }
   } catch (error) {
-    console.error(`Ошибка загрузки товара ${itemId}:`, error);
+    console.error(`Ошибка загружки товара ${itemId}:`, error);
   }
   
   return null;
@@ -356,7 +320,6 @@ async function addItemToCartAPI(item, itemType) {
   try {
     const user = AppState.user;
     if (!user) {
-      // Для неавторизованных пользователей - локальная корзина
       const itemId = `local-${item.id}-${Date.now()}`;
       AppState.cart[itemId] = {
         id: itemId,
@@ -378,14 +341,12 @@ async function addItemToCartAPI(item, itemType) {
     
     console.log('Добавление товара в корзину:', item);
     
-    // Подготавливаем данные для API
     const requestData = {
       item_type: itemType,
       quantity: 1,
       price: item.price || 0
     };
     
-    // Добавляем правильное поле ID
     const id = parseInt(item.id);
     if (itemType === 'product') {
       requestData.product_id = id;
@@ -410,11 +371,10 @@ async function addItemToCartAPI(item, itemType) {
       const cartItem = await response.json();
       console.log('Ответ от сервера:', cartItem);
       
-      // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сохраняем ВСЕ данные из карточки товара
       const cartItemId = `cart-${cartItem.id}`;
       AppState.cart[cartItemId] = {
         id: cartItemId,
-        title: item.title, // Берем из карточки товара
+        title: item.title,
         price: item.price || 0,
         qty: cartItem.quantity,
         thumb: item.thumb || item.image_url || 'https://via.placeholder.com/160x90',
@@ -423,7 +383,6 @@ async function addItemToCartAPI(item, itemType) {
         api_id: cartItem.id,
         item_type: itemType,
         item_id: item.id,
-        // Сохраняем все исходные данные
         source_data: item
       };
       
@@ -437,7 +396,6 @@ async function addItemToCartAPI(item, itemType) {
       const errorText = await response.text();
       console.error('Ошибка API:', errorText);
       
-      // Fallback: добавляем в локальную корзину
       const fallbackId = `fallback-${item.id}-${Date.now()}`;
       AppState.cart[fallbackId] = {
         id: fallbackId,
@@ -462,7 +420,6 @@ async function addItemToCartAPI(item, itemType) {
   } catch (error) {
     console.error('Ошибка добавления в корзину:', error);
     
-    // Добавляем в локальную корзину при любой ошибке
     const errorId = `error-${item.id}-${Date.now()}`;
     AppState.cart[errorId] = {
       id: errorId,
@@ -490,7 +447,6 @@ async function updateCartItemQuantityAPI(cartItemId, newQty) {
   try {
     const user = AppState.user;
     if (!user) {
-      // Для неавторизованных пользователей обновляем локально
       updateCartQuantity(cartItemId, newQty);
       return { success: true };
     }
@@ -513,7 +469,6 @@ async function updateCartItemQuantityAPI(cartItemId, newQty) {
     if (response.ok) {
       const updatedItem = await response.json();
       
-      // Обновляем локальное состояние
       if (newQty <= 0) {
         delete AppState.cart[cartItemId];
       } else {
@@ -538,7 +493,6 @@ async function removeItemFromCartAPI(cartItemId) {
   try {
     const user = AppState.user;
     if (!user) {
-      // Для неавторизованных пользователей удаляем локально
       removeFromCart(cartItemId);
       return { success: true };
     }
@@ -557,7 +511,6 @@ async function removeItemFromCartAPI(cartItemId) {
     });
     
     if (response.ok) {
-      // Удаляем из локального состояния
       delete AppState.cart[cartItemId];
       saveCart();
       updateCartCount();
@@ -577,7 +530,6 @@ async function clearCartAPI() {
   try {
     const user = AppState.user;
     if (!user) {
-      // Для неавторизованных пользователей очищаем локально
       clearCart();
       return { success: true };
     }
@@ -590,7 +542,6 @@ async function clearCartAPI() {
     });
     
     if (response.ok) {
-      // Очищаем локальное состояние
       AppState.cart = {};
       saveCart();
       updateCartCount();
@@ -606,23 +557,16 @@ async function clearCartAPI() {
   }
 }
 
-// ====================
-// ЗАГРУЗКА СОСТОЯНИЯ И АВТОРИЗАЦИЯ
-// ====================
-
 function loadStateFromStorage() {
   try {
-    // Корзина
     const cart = JSON.parse(localStorage.getItem('kv_cart') || '{}');
     AppState.cart = cart;
     
-    // Пользователь
     const user = JSON.parse(localStorage.getItem('kv_user') || 'null');
     if (user) {
       AppState.user = user;
     }
     
-    // Продукты из снапшота
     try {
       const savedProducts = JSON.parse(localStorage.getItem('kv_products_snapshot') || '[]');
       if (savedProducts.length > 0 && AppState.products.length === 0) {
@@ -647,34 +591,26 @@ async function checkAuthStatus() {
   if (user && user.name && user.id) {
     AppState.user = user;
     
-    // Пользователь авторизован
     if (userProfile) userProfile.style.display = 'flex';
     if (authButtons) authButtons.style.display = 'none';
-    if (cartBtn) cartBtn.style.display = 'block'; // Показываем корзину
+    if (cartBtn) cartBtn.style.display = 'block';
     
-    // Обновляем аватар и имя
     updateUserProfileUI(user);
     
-    // Загружаем избранное пользователя
     await loadUserFavorites();
     
-    // Загружаем корзину пользователя
     await loadUserCart();
     
-    // Обновляем кнопки избранного на странице
     updateFavoriteButtons();
     
-    // Добавляем обработчик выхода
     setupLogoutHandler();
   } else {
-    // Пользователь не авторизован
     AppState.user = null;
-    AppState.favorites = []; // Очищаем избранное при выходе
+    AppState.favorites = [];
     if (userProfile) userProfile.style.display = 'none';
     if (authButtons) authButtons.style.display = 'flex';
-    if (cartBtn) cartBtn.style.display = 'none'; // СКРЫВАЕМ КОРЗИНУ
+    if (cartBtn) cartBtn.style.display = 'none';
     
-    // Обновляем кнопки избранного на странице
     updateFavoriteButtons();
   }
   
@@ -688,7 +624,7 @@ function updateUserProfileUI(user) {
   
   if (userAvatar) {
     if (user.avatar) {
-      userAvatar.style.backgroundImage = `url('${user.avatar}')`;
+      userAvatar.style.backgroundImage = `url('${user.avatar}')`;;
       userAvatar.textContent = '';
     } else {
       userAvatar.style.backgroundImage = 'none';
@@ -704,7 +640,6 @@ function updateUserProfileUI(user) {
 function setupLogoutHandler() {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    // Удаляем старые обработчики
     logoutBtn.replaceWith(logoutBtn.cloneNode(true));
     const newLogoutBtn = document.getElementById('logoutBtn');
     
@@ -718,14 +653,10 @@ function setupLogoutHandler() {
 function logoutUser() {
   localStorage.removeItem('kv_user');
   AppState.user = null;
-  AppState.favorites = []; // Очищаем избранное
+  AppState.favorites = [];
   checkAuthStatus();
   showToast('Вы вышли из аккаунта', 'info');
 }
-
-// ====================
-// КОРЗИНА (ЛОКАЛЬНЫЕ ФУНКЦИИ)
-// ====================
 
 function saveCart() {
   localStorage.setItem('kv_cart', JSON.stringify(AppState.cart));
@@ -756,9 +687,8 @@ function addToCart(item) {
     };
   }
   
-  // Если пользователь авторизован, сохраняем в API
   if (AppState.user) {
-    const itemType = item.item_type || 'product'; // Определяем тип
+    const itemType = item.item_type || 'product';
     addItemToCartAPI(item, itemType);
   } else {
     saveCart();
@@ -769,7 +699,6 @@ function addToCart(item) {
 
 function removeFromCart(itemId) {
   if (AppState.cart[itemId]) {
-    // Если пользователь авторизован, удаляем из API
     if (AppState.user && AppState.cart[itemId].api_id) {
       removeItemFromCartAPI(itemId);
     } else {
@@ -785,7 +714,6 @@ function updateCartQuantity(itemId, newQty) {
     if (newQty <= 0) {
       removeFromCart(itemId);
     } else {
-      // Если пользователь авторизован, обновляем в API
       if (AppState.user && AppState.cart[itemId].api_id) {
         updateCartItemQuantityAPI(itemId, newQty);
       } else {
@@ -797,7 +725,6 @@ function updateCartQuantity(itemId, newQty) {
 }
 
 function clearCart() {
-  // Если пользователь авторизован, очищаем в API
   if (AppState.user) {
     clearCartAPI();
   } else {
@@ -813,35 +740,28 @@ function getCartTotal() {
   }, 0);
 }
 
-// ====================
-// API ФУНКЦИИ ДЛЯ ТОВАРОВ
-// ====================
-
 async function loadProducts() {
   try {
-    console.log('Загрузка продуктов с сервера...');
+    console.log('Загружка продуктов с сервера...');
     
-    // Показываем индикатор загрузки
     AppState.isLoading = true;
     const productsContainer = document.getElementById('products');
     if (productsContainer) {
       productsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">
-          <div style="margin-bottom: 10px;">Загрузка товаров...</div>
+          <div style="margin-bottom: 10px;">Загружка товаров...</div>
           <div style="width: 40px; height: 4px; background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); margin: 0 auto; border-radius: 2px; animation: pulse 1.5s infinite;"></div>
         </div>
       `;
     }
     
-    // Используем относительный путь
     let url = `/products/?skip=0&limit=100&active_only=true`;
     
-    // Если выбрана категория (не "all"), добавляем фильтр
     if (AppState.currentCategory && AppState.currentCategory !== 'all') {
       url += `&category=${encodeURIComponent(AppState.currentCategory)}`;
     }
     
-    console.log('Запрос к API:', url);
+    console.log('Прос к АПИ:', url);
     
     const response = await fetch(url);
     
@@ -852,7 +772,6 @@ async function loadProducts() {
     const productsData = await response.json();
     console.log('Получены продукты с сервера:', productsData);
     
-    // Преобразуем данные из API
     AppState.products = productsData.map(product => {
       const isActive = product.is_active !== false;
       let thumbnail = 'https://via.placeholder.com/400x200?text=No+preview';
@@ -878,9 +797,8 @@ async function loadProducts() {
       };
     });
     
-    // Сохраняем снимок
     localStorage.setItem('kv_products_snapshot', JSON.stringify(AppState.products));
-    console.log('Продукты успешно загружены из БД:', AppState.products.length, 'шт.');
+    console.log('Продукты успешно загружены:', AppState.products.length, 'шт.');
     
     AppState.isLoading = false;
     updateProductCounters();
@@ -888,18 +806,17 @@ async function loadProducts() {
     return AppState.products;
     
   } catch (error) {
-    console.error('Не удалось загрузить товары с сервера:', error);
+    console.error('Не удалось загрузить товары:', error);
     AppState.isLoading = false;
-    showToast('Ошибка загрузки товаров. Используются демо-данные.', 'error');
+    showToast('Ошибка загружки товаров. Используются демо-данные.', 'error');
     
-    // Используем демо-данные
     AppState.products = getDemoProducts();
     
     try {
       const savedProducts = JSON.parse(localStorage.getItem('kv_products_snapshot') || '[]');
       if (savedProducts.length > 0) {
         AppState.products = savedProducts;
-        console.log('Используем сохраненные продукты из localStorage');
+        console.log('Используем сохраненные продукты');
       }
     } catch (e) {
       console.warn('Не удалось загрузить продукты из localStorage:', e);
@@ -931,10 +848,10 @@ async function loadMarketListings() {
       });
       
       localStorage.setItem('kv_market_listings', JSON.stringify(AppState.marketListings));
-      console.log('Публикации маркетплейса загружены:', AppState.marketListings.length, 'шт.');
+      console.log('Публикации загружены:', AppState.marketListings.length, 'шт.');
     }
   } catch (error) {
-    console.warn('Не удалось загрузить публикации с сервера:', error);
+    console.warn('Не удалось загрузить публикации:', error);
     AppState.marketListings = getDemoMarketListings();
   }
 }
@@ -952,7 +869,7 @@ async function loadAccountListings() {
           title: listing.title || 'Без названия',
           price: parseFloat(listing.price) || 0,
           topic: listing.topic || listing.category || 'Авторское',
-          thumb: listing.image_url || listing.thumbnail || 'https://via.placeholder.com/400x200?text=Издание',
+          thumb: listing.image_url || listing.thumbnail || 'https://via.placeholder.com/400x200?text=Нанесение',
           description: listing.description || 'Авторское издание',
           user_id: listing.user_id,
           is_active: listing.is_active !== false,
@@ -995,8 +912,8 @@ async function createMarketListing(listingData) {
       return newListing;
     } else {
       const errorText = await response.text();
-      console.error('Ошибка API маркетплейса:', errorText);
-      throw new Error('Ошибка создания публикации на маркетплейсе');
+      console.error('Ошибка API:', errorText);
+      throw new Error('Ошибка создания публикации');
     }
   } catch (error) {
     console.error('Ошибка создания публикации:', error);
@@ -1031,17 +948,15 @@ async function createAccountListing(listingData) {
     
     if (response.ok) {
       const newListing = await response.json();
-      console.log('Авторское издание успешно создано:', newListing);
+      console.log('Авторское издание создано:', newListing);
       showToast('Авторское издание успешно создано!', 'success');
       return newListing;
     } else {
-      // Пытаемся распарсить ошибку
       let errorMessage = 'Ошибка создания издания';
       try {
         const errorData = await response.json();
         errorMessage = errorData.detail || errorData.message || errorMessage;
       } catch (parseError) {
-        // Если не можем распарсить JSON, используем текст ошибки
         const errorText = await response.text();
         console.error('Текст ошибки:', errorText);
         errorMessage = `Ошибка сервера (${response.status}): ${errorText || response.statusText}`;
@@ -1054,10 +969,6 @@ async function createAccountListing(listingData) {
     return null;
   }
 }
-
-// ====================
-// РЕНДЕРИНГ
-// ====================
 
 function updateProductCounters() {
   updateCategoryCounts();
@@ -1165,7 +1076,6 @@ function renderProducts() {
     return;
   }
   
-  // Фильтрация
   let filteredProducts = AppState.products;
   
   if (AppState.currentCategory !== 'all') {
@@ -1187,10 +1097,8 @@ function renderProducts() {
     );
   }
   
-  // Сортировка
   filteredProducts = sortProducts(filteredProducts, AppState.currentSort);
   
-  // Если нет продуктов
   if (filteredProducts.length === 0) {
     productsContainer.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">
@@ -1204,7 +1112,6 @@ function renderProducts() {
     return;
   }
   
-  // Рендеринг
   productsContainer.innerHTML = filteredProducts.map(product => {
     const formattedPrice = formatPrice(product.price);
     const categoryLower = product.category.toLowerCase();
@@ -1233,7 +1140,6 @@ function renderProducts() {
          </div>`
       : '';
     
-    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Правильно проверяем избранное
     const isFavorited = AppState.user ? isItemFavorited(product.id, 'product') : false;
     
     return `
@@ -1298,7 +1204,6 @@ function renderMarketListings() {
   if (!marketGrid) return;
   
   marketGrid.innerHTML = AppState.marketListings.map(listing => {
-    // Правильно проверяем избранное для публикаций
     const isFavorited = AppState.user ? isItemFavorited(listing.id, 'market') : false;
     
     return `
@@ -1340,7 +1245,6 @@ function renderAccountListings() {
   if (!accMarketGrid) return;
   
   accMarketGrid.innerHTML = AppState.accountListings.map(listing => {
-    // Правильно проверяем избранное для авторских изданий
     const isFavorited = AppState.user ? isItemFavorited(listing.id, 'account') : false;
     
     return `
@@ -1348,7 +1252,7 @@ function renderAccountListings() {
       <div class="media">
         <img src="${listing.thumb}" 
              alt="${listing.title}"
-             onerror="this.src='https://via.placeholder.com/400x200?text=Издание'">
+             onerror="this.src='https://via.placeholder.com/400x200?text=Нанесение'">
       </div>
       <div>
         <h3>${listing.title}</h3>
@@ -1405,10 +1309,6 @@ function renderReviews() {
   `).join('');
 }
 
-// ====================
-// МОДАЛЬНЫЕ ОКНА И ФОРМЫ
-// ====================
-
 function renderCartModal() {
   const cartItems = document.getElementById('cartItems');
   const cartTotal = document.getElementById('cartTotal');
@@ -1424,15 +1324,12 @@ function renderCartModal() {
   }
   
   cartItems.innerHTML = items.map(item => {
-    // Используем полные данные, если есть
     const title = item.title || `Товар #${item.item_id || item.id}`;
     const thumb = item.thumb || 'https://via.placeholder.com/60x60?text=Товар';
     const category = item.category || 'Товар';
     
-    // Цвет категории
     const categoryColor = getCategoryColor(category);
     
-    // Форматируем цены
     const itemPrice = formatPrice(item.price);
     const itemTotal = formatPrice(item.price * item.qty);
     
@@ -1442,16 +1339,13 @@ function renderCartModal() {
       border-bottom: 1px solid rgba(255,255,255,0.05);
       align-items: center;
     ">
-      <!-- Изображение -->
       <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
         <img src="${thumb}" alt="${title}" 
              style="width: 100%; height: 100%; object-fit: cover;"
              onerror="this.src='https://via.placeholder.com/60x60?text=Товар'">
       </div>
       
-      <!-- Информация -->
       <div style="flex: 1; min-width: 0;">
-        <!-- Заголовок и цена -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
           <div>
             <strong style="display: block; font-size: 14px; margin-bottom: 4px;">${title}</strong>
@@ -1473,14 +1367,12 @@ function renderCartModal() {
           </div>
         </div>
         
-        <!-- Описание (если есть) -->
         ${item.description ? `
           <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.3;">
             ${item.description.length > 60 ? item.description.substring(0, 60) + '...' : item.description}
           </div>
         ` : ''}
         
-        <!-- Управление количеством -->
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <button data-action="decrease-qty" data-id="${item.id}" 
@@ -1514,7 +1406,6 @@ function renderCartModal() {
 }
 
 function setupModalListeners() {
-  // Корзина
   const cartBtn = document.getElementById('cartBtn');
   const cartModal = document.getElementById('cartModal');
   const closeCart = document.getElementById('closeCart');
@@ -1557,7 +1448,6 @@ function setupModalListeners() {
     });
   }
   
-  // Закрытие модальных окон по клику вне
   document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal')) {
       e.target.setAttribute('aria-hidden', 'true');
@@ -1567,7 +1457,6 @@ function setupModalListeners() {
 }
 
 function setupListingForms() {
-  // Публикации на маркете
   const openListForm = document.getElementById('openListForm');
   const listingForm = document.getElementById('listingForm');
   const cancelListing = document.getElementById('cancelListing');
@@ -1618,7 +1507,6 @@ function setupListingForms() {
         listingForm.style.display = 'none';
         openListForm.style.display = 'block';
         
-        // Очищаем форму
         document.getElementById('listTitle').value = '';
         document.getElementById('listPrice').value = '';
         document.getElementById('listGame').value = '';
@@ -1627,7 +1515,6 @@ function setupListingForms() {
     });
   }
   
-  // Авторские издания
   const openAccListForm = document.getElementById('openAccListForm');
   const accListingForm = document.getElementById('accListingForm');
   const cancelAccListing = document.getElementById('cancelAccListing');
@@ -1667,7 +1554,7 @@ function setupListingForms() {
         title,
         price,
         topic: games,
-        thumb: thumb || 'https://via.placeholder.com/400x200?text=Издание',
+        thumb: thumb || 'https://via.placeholder.com/400x200?text=Нанесение',
         description: `Авторское издание: ${games}`
       };
       
@@ -1678,7 +1565,6 @@ function setupListingForms() {
         accListingForm.style.display = 'none';
         openAccListForm.style.display = 'block';
         
-        // Очищаем форму
         document.getElementById('accListTitle').value = '';
         document.getElementById('accListPrice').value = '';
         document.getElementById('accListGames').value = '';
@@ -1688,12 +1574,7 @@ function setupListingForms() {
   }
 }
 
-// ====================
-// ОБРАБОТЧИКИ СОБЫТИЙ
-// ====================
-
 function setupEventListeners() {
-  // Поиск
   const searchInput = document.getElementById('search');
   if (searchInput) {
     let searchTimeout;
@@ -1706,7 +1587,6 @@ function setupEventListeners() {
     });
   }
   
-  // Фильтры категорий
   document.querySelectorAll('[data-cat]').forEach(button => {
     button.addEventListener('click', async (e) => {
       const category = e.target.dataset.cat;
@@ -1718,7 +1598,7 @@ function setupEventListeners() {
       });
       
       if (category !== 'all') {
-        showToast(`Загрузка товаров категории "${category}"...`, 'info');
+        showToast(`Загружка товаров категории "${category}"...`, 'info');
       }
       
       await loadProducts();
@@ -1726,7 +1606,6 @@ function setupEventListeners() {
     });
   });
   
-  // Сортировка
   document.querySelectorAll('[data-sort]').forEach(button => {
     button.addEventListener('click', (e) => {
       const sortType = e.target.dataset.sort;
@@ -1741,16 +1620,12 @@ function setupEventListeners() {
     });
   });
   
-  // Глобальные клики
   document.addEventListener('click', handleGlobalClick);
   
-  // Модальные окна
   setupModalListeners();
   
-  // Формы публикаций
   setupListingForms();
   
-  // Чат (упрощенно)
   const chatBtn = document.getElementById('chatBtn');
   const chatModal = document.getElementById('chatModal');
   
@@ -1770,7 +1645,6 @@ function setupEventListeners() {
     });
   }
   
-  // Оплата (упрощенно)
   setupPaymentListeners();
 }
 
@@ -1793,12 +1667,10 @@ async function handleGlobalClick(e) {
     case 'toggle-favorite':
       const isNowFavorited = await toggleFavorite(itemId, itemType);
       
-      // Обновляем конкретную кнопку
       button.setAttribute('aria-pressed', isNowFavorited);
       button.classList.toggle('active-chip', isNowFavorited);
       button.textContent = AppState.user ? (isNowFavorited ? 'В избранном' : 'В избранное') : 'В избранное';
       
-      // Также обновляем все кнопки на случай, если есть дубли
       updateFavoriteButtons();
       break;
       
@@ -1842,7 +1714,6 @@ function getItemById(id, type) {
 }
 
 function setupPaymentListeners() {
-  // Выбор способа оплаты
   let currentPaymentMethod = 'card-visa';
   
   document.addEventListener('click', (e) => {
@@ -1856,13 +1727,11 @@ function setupPaymentListeners() {
       paymentMethodHidden.value = method;
     }
     
-    // Обновляем визуальное состояние
     document.querySelectorAll('.payment-chip').forEach(c => {
       c.classList.toggle('selected', c === chip);
     });
   });
   
-  // Подтверждение оплаты
   const confirmPayment = document.getElementById('confirmPayment');
   const cancelCheckout = document.getElementById('cancelCheckout');
   
@@ -1877,12 +1746,10 @@ function setupPaymentListeners() {
         return;
       }
       
-      // Симуляция оплаты
       confirmPayment.disabled = true;
       confirmPayment.textContent = 'Обработка...';
       
       setTimeout(() => {
-        // Сохраняем заказ
         const order = {
           id: 'ord-' + Date.now(),
           user: AppState.user ? AppState.user.name : name,
@@ -1898,10 +1765,8 @@ function setupPaymentListeners() {
         orders.unshift(order);
         localStorage.setItem('kv_orders', JSON.stringify(orders));
         
-        // Очищаем корзину
         clearCart();
         
-        // Закрываем модальное окно
         const cartModal = document.getElementById('cartModal');
         if (cartModal) {
           cartModal.setAttribute('aria-hidden', 'true');
@@ -1910,7 +1775,6 @@ function setupPaymentListeners() {
         
         showToast(`Заказ оформлен! Ссылки отправлены на ${email}`, 'success');
         
-        // Сбрасываем кнопку
         confirmPayment.disabled = false;
         confirmPayment.textContent = 'Оплатить';
       }, 1500);
@@ -1930,10 +1794,6 @@ function setupPaymentListeners() {
     });
   }
 }
-
-// ====================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ====================
 
 function resetFilters() {
   AppState.currentCategory = 'all';
@@ -1963,10 +1823,6 @@ function resetFilters() {
   });
 }
 
-// ====================
-// ДЕМО-ДАННЫЕ
-// ====================
-
 function getDemoProducts() {
   return [
     {
@@ -1987,46 +1843,6 @@ function getDemoProducts() {
       thumb: 'https://cdn.cloudflare.steamstatic.com/steam/apps/319510/header.jpg',
       description: 'Вся история Five Nights at Freddy\'s от первой до последней части. Анализ лора и теории.',
       popularity: 78,
-      is_active: true
-    },
-    {
-      id: '3',
-      title: 'Silent Hill 2: Анализ сюжета',
-      price: 799,
-      category: 'Классика',
-      thumb: 'https://cdn.cloudflare.steamstatic.com/steam/apps/2124490/header.jpg',
-      description: 'Глубокий анализ культовой игры. Символизм, персонажи и психологические аспекты сюжета.',
-      popularity: 85,
-      is_active: true
-    },
-    {
-      id: '4',
-      title: 'Гайд по стратегиям в CS:GO',
-      price: 499,
-      category: 'Стратегия',
-      thumb: 'https://cdn.cloudflare.steamstatic.com/steam/apps/730/header.jpg',
-      description: 'Советы и стратегии для победы. Тактики на всех картах, руководство по оружию и экономике.',
-      popularity: 92,
-      is_active: true
-    },
-    {
-      id: '5',
-      title: 'Among Us: Полное руководство',
-      price: 299,
-      category: 'Инди',
-      thumb: 'https://cdn.cloudflare.steamstatic.com/steam/apps/945360/header.jpg',
-      description: 'Как выигрывать как предатель и член экипажа. Тактики, психология и анализ поведения.',
-      popularity: 67,
-      is_active: true
-    },
-    {
-      id: '6',
-      title: 'Control: Все секреты и пасхалки',
-      price: 699,
-      category: 'Анализ',
-      thumb: 'https://cdn.cloudflare.steamstatic.com/steam/apps/870780/header.jpg',
-      description: 'Исследование вселенной Control. Поиск всех секретов, пасхалок и связей с другими играми Remedy.',
-      popularity: 73,
       is_active: true
     }
   ];
@@ -2069,64 +1885,47 @@ function getDemoReviews() {
     {
       author: 'Мария',
       rating: 4,
-      text: 'Интересный анализ, много новых деталей узнала.',
+      text: 'Ок поланов, много новых деталей узнала.',
       product: 'Silent Hill 2: Анализ'
-    },
-    {
-      author: 'Дмитрий',
-      rating: 5,
-      text: 'Купил несколько гайдов, все на высшем уровне!',
-      product: 'Разные гайды'
     }
   ];
 }
 
-// ====================
-// ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-// ====================
-
 async function initApp() {
   try {
-    console.log('Инициализация приложения с API...');
+    console.log('Нициализация приложения с API...');
     
-    // Загружаем состояние из localStorage
     loadStateFromStorage();
     
-    // Проверяем авторизацию и загружаем избранное
     await checkAuthStatus();
     
-    // Загружаем остальные данные с сервера
     await Promise.allSettled([
       loadProducts(),
       loadMarketListings(),
       loadAccountListings()
     ]);
     
-    // Рендерим интерфейс
     renderProducts();
     renderMarketListings();
     renderAccountListings();
     renderReviews();
     updateCartCount();
     
-    // Настраиваем обработчики событий
     setupEventListeners();
     
-    // Обновляем кнопку чата
     updateChatButton();
     
     console.log('Приложение успешно инициализировано');
     console.log('Пользователь:', AppState.user ? 'авторизован' : 'не авторизован');
-    console.log('Избранных товаров:', AppState.favorites.length);
+    console.log('Обработано товаров:', AppState.favorites.length);
     console.log('Товаров в корзине:', Object.keys(AppState.cart).length);
     
     showToast('Данные успешно загружены', 'success');
     
   } catch (error) {
-    console.error('Критическая ошибка инициализации приложения:', error);
-    showToast('Ошибка загрузки данных. Используются демо-данные.', 'error');
+    console.error('Критическая ошибка:', error);
+    showToast('Ошибка загружки данных. Используются демо-данные.', 'error');
     
-    // Все равно рендерим интерфейс с демо-данными
     renderProducts();
     renderMarketListings();
     renderAccountListings();
@@ -2137,13 +1936,8 @@ async function initApp() {
   }
 }
 
-// ====================
-// ЗАПУСК ПРИЛОЖЕНИЯ
-// ====================
-
 document.addEventListener('DOMContentLoaded', initApp);
 
-// Экспортируем для глобального использования
 window.resetFilters = resetFilters;
 window.AppState = AppState;
 window.addToCart = addToCart;
@@ -2152,10 +1946,6 @@ window.clearCart = clearCart;
 window.toggleFavorite = toggleFavorite;
 window.isItemFavorited = isItemFavorited;
 window.loadUserFavorites = loadUserFavorites;
-
-// ====================
-// ДОПОЛНИТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ЧАТА
-// ====================
 
 function updateChatButton() {
   const chatBtn = document.getElementById('chatBtn');

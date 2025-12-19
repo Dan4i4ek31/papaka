@@ -4,13 +4,11 @@ from app.repositories.users import UsersRepository
 
 
 class DBManager:
-    def __init__(self, session_factory: async_session_maker): # type: ignore
+    def __init__(self, session_factory: async_session_maker):
         self.session_factory = session_factory
 
     async def __aenter__(self):
         self.session = self.session_factory()
-        # TODO Добавить сюда созданные репозитории
-        # Пример:
         self.users = UsersRepository(self.session)
         self.roles = RolesRepository(self.session)
         return self
