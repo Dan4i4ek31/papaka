@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form, Query
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.schemas.user_schema import User, UserCreate, UserUpdate
@@ -79,12 +79,36 @@ def delete_user(
     except UserNotFoundException as e:
         raise e
 
+# 🔧 ИСПРАВЛЕННЫЙ ЭНДПОИНТ: Поддерживает и GET и POST
 @router.post("/authenticate")
-def authenticate(
-    email: str,
-    password: str,
+def authenticate_post(
+    email: str = Form(...),
+    password: str = Form(...),
     user_service: UserService = Depends(get_user_service)
 ):
+    """
+    Аутентификация через POST с form-data или JSON body
+    """
+    try:
+        user = user_service.authenticate_user(email, password)
+        return {
+            "message": "Authenticated successfully", 
+            "user_id": user.id,
+            "name": user.name,
+            "email": user.email
+        }
+    except InvalidCredentialsException as e:
+        raise e
+
+@router.post("/authenticate")
+def authenticate_query(
+    email: str = Query(...),
+    password: str = Query(...),
+    user_service: UserService = Depends(get_user_service)
+):
+    """
+    Аутентификация через query parameters (старая версия)
+    """
     try:
         user = user_service.authenticate_user(email, password)
         return {
