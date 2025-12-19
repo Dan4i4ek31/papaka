@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Form, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.schemas.user_schema import User, UserCreate, UserUpdate
@@ -79,73 +79,17 @@ def delete_user(
     except UserNotFoundException as e:
         raise e
 
-# 🔓 ЕдиНЫЙ АВТОПОСТ МАРШРУТ ДЛЯ АУТЕНТИФИКАЦИИ
-# Принимает: query params, form data, и JSON body
 @router.post("/authenticate")
-def authenticate_user(
-    email: str = Query(None),
-    password: str = Query(None),
+def authenticate(
+    email: str,
+    password: str,
     user_service: UserService = Depends(get_user_service)
 ):
-    """
-    Аутентификация пользователя
-    
-    Поддерживает:
-    - GET /users/authenticate?email=...&password=... (старая API)
-    - POST /users/authenticate?email=...&password=... (query params)
-    - POST /users/authenticate (JSON body)
-    """
-    
-    if not email or not password:
-        raise HTTPException(
-            status_code=400,
-            detail="Email and password are required"
-        )
-    
     try:
         user = user_service.authenticate_user(email, password)
         return {
             "message": "Authenticated successfully", 
             "user_id": user.id,
-            "id": user.id,
-            "name": user.name,
-            "email": user.email
-        }
-    except InvalidCredentialsException as e:
-        raise e
-
-# АЛЬТЕРНАТИВНО: POST аутентификация с JSON телом
-# Она автоматически загружается иссли в JSON body email и password
-@router.post("/authenticate/json")
-def authenticate_user_json(
-    credentials: dict,
-    user_service: UserService = Depends(get_user_service)
-):
-    """
-    Аутентификация через JSON
-    
-    Пример:
-    POST /users/authenticate/json
-    {
-        "email": "user@example.com",
-        "password": "password123"
-    }
-    """
-    email = credentials.get("email")
-    password = credentials.get("password")
-    
-    if not email or not password:
-        raise HTTPException(
-            status_code=400,
-            detail="Email and password are required"
-        )
-    
-    try:
-        user = user_service.authenticate_user(email, password)
-        return {
-            "message": "Authenticated successfully", 
-            "user_id": user.id,
-            "id": user.id,
             "name": user.name,
             "email": user.email
         }

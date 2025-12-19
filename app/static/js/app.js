@@ -1,5 +1,8 @@
 // /app/static/js/app.js (ПОЛНЫЙ КОД С ИЗБРАННЫМ ПО АККАУНТУ)
 
+// Базовый URL API
+const API_BASE_URL = 'http://localhost:8000';
+
 // Состояние приложения
 const AppState = {
   user: null,
@@ -685,7 +688,7 @@ function updateUserProfileUI(user) {
   
   if (userAvatar) {
     if (user.avatar) {
-      userAvatar.style.backgroundImage = `url('${user.avatar}')}`;
+      userAvatar.style.backgroundImage = `url('${user.avatar}')`;
       userAvatar.textContent = '';
     } else {
       userAvatar.style.backgroundImage = 'none';

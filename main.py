@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+import uvicorn
 from app.database.database import engine, Base, create_tables
 from app.router import (
     role_router,
@@ -81,36 +82,12 @@ app.mount("/app/static", StaticFiles(directory=STATIC_DIR), name="static")
 # Настройте шаблоны
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-# 🔧 УЛУЧШЕННАЯ CORS КОНФИГУРАЦИЯ
-# Поддерживает мобильные устройства и удаленный доступ
 app.add_middleware(
     CORSMiddleware,
-    # Разрешаем ВСЕ origins (можно сузить по надобности)
-    # Например: ["http://localhost:8000", "http://192.168.1.100:8000", "https://yourdomain.com"]
-    allow_origins=[
-        "http://localhost:8000",
-        "http://localhost:3000",
-        "http://127.0.0.1:8000",
-        "*"  # Временно разрешаем все origins - можно удалить в production
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=[
-        "*",
-        "Accept",
-        "Accept-Language",
-        "Content-Type",
-        "Authorization",
-        "X-CSRF-Token",
-        "X-Requested-With",
-    ],
-    expose_headers=[
-        "Content-Type",
-        "X-Total-Count",
-        "X-Page",
-        "X-Page-Count",
-    ],
-    max_age=600,  # Кэшируем CORS preflight запросы на 10 минут
+    allow_headers=["*"],
 )
 
 setup_exception_handlers(app)
@@ -166,4 +143,9 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     
-    uvicorn.run("main:app", host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=False  
+    )
